@@ -1,0 +1,14 @@
+# Python 환경 관련
+__pycache__/
+*.pyc
+*.pyo
+
+# 가상 환경
+myenv/
+
+# Django 관련
+db.sqlite3
+media/
+
+# 환경 설정 파일
+.env
