@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주식 추천</title>
+    <style>
+        #progress-container {
+            width: 100%;
+            background-color: #f3f3f3;
+            margin: 20px 0;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>KOSPI 추천 종목</h1>
+    <button id="start-button">분석 시작</button>
+    <div id="progress-container">
+        <div id="progress-bar">0%</div>
+    </div>
+    <div id="result">
+        <ul id="stock-list"></ul>
+    </div>
+    <script>
+        document.getElementById('start-button').addEventListener('click', function() {
+            const progressBar = document.getElementById('progress-bar');
+            const stockList = document.getElementById('stock-list');
+            stockList.innerHTML = ''; // Clear previous results
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+
+            fetch('/start-analysis/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'started') {
+                        updateProgress();
+                    }
+                });
+        });
+
+        function updateProgress() {
+            fetch('/progress/')
+                .then(response => response.json())
+                .then(data => {
+                    const progressBar = document.getElementById('progress-bar');
+                    const stockList = document.getElementById('stock-list');
+
+                    progressBar.style.width = data.progress + '%';
+                    progressBar.textContent = data.progress + '%';
+
+                    if (data.progress < 100) {
+                        setTimeout(updateProgress, 500); // Update progress every 500ms
+                    } else {
+                        // Display results
+                        data.recommended_stocks.forEach(stock => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<h2>${stock.ticker}</h2><ul>${stock.buy_signals.map(signal => `<li>날짜: ${signal.date}, 종가: ${signal.close}, RSI: ${signal.rsi}</li>`).join('')}</ul>`;
+                            stockList.appendChild(li);
+                        });
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
