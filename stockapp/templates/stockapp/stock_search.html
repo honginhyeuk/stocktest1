@@ -9,17 +9,21 @@
     <h1>KOSPI 추천 종목</h1>
     <button id="start-button">분석 시작</button>
     <div id="result">
+        <p id="date"></p>
         <ul id="stock-list"></ul>
     </div>
     <script>
         document.getElementById('start-button').addEventListener('click', function() {
             const stockList = document.getElementById('stock-list');
+            const dateElement = document.getElementById('date');
             stockList.innerHTML = ''; // Clear previous results
+            dateElement.textContent = ''; // Clear previous date
 
             fetch('/start-analysis/')
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
+                        dateElement.textContent = `기준 날짜: ${data.date}`;
                         data.recommended_stocks.forEach(stock => {
                             const li = document.createElement('li');
                             li.innerHTML = `<h2>${stock.name} (${stock.ticker})</h2><ul>${stock.buy_signals.map(signal => `<li>날짜: ${signal.Date}, 종가: ${signal.Close}, RSI: ${signal.RSI}</li>`).join('')}</ul>`;
